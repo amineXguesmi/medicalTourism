@@ -1,0 +1,40 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: medtour-postgres
+    environment:
+      POSTGRES_DB: medtour_ai
+      POSTGRES_USER: medtour
+      POSTGRES_PASSWORD: medtour_dev_password
+    ports:
+      - "55432:5432"
+    volumes:
+      - medtour-postgres-16-mvp-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medtour -d medtour_ai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8
+    container_name: medtour-redis
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    container_name: medtour-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: medtour
+      MINIO_ROOT_PASSWORD: medtour_dev_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - medtour-minio-data:/data
+
+volumes:
+  medtour-postgres-16-mvp-data:
+  medtour-minio-data:

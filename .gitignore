@@ -1,0 +1,53 @@
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+.runtime/
+
+# Node / Next.js / NestJS
+node_modules/
+.next/
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Flutter / Dart
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+pubspec.lock
+!apps/mobile/pubspec.lock
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/ephemeral/
+**/android/.gradle/
+**/android/local.properties
+
+# Generated API clients
+packages/api-contracts/generated/
+
+# Local data and sensitive uploads
+tmp/
+uploads/
+storage/
+*.pem
+*.key
+*.p12
+
+# Infrastructure state
+.terraform/
+*.tfstate
+*.tfstate.*

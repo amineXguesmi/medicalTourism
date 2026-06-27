@@ -1,0 +1,9 @@
+{
+  "name": "@medtour/config",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "echo \"No shared config lint target yet.\"",
+    "test": "echo \"No shared config tests yet.\""
+  }
+}

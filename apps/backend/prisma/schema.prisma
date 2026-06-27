@@ -1,0 +1,414 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PATIENT
+  CLINIC
+  DOCTOR
+  ADMIN
+  SUPPORT
+  DPO
+}
+
+enum BiologicalSex {
+  FEMALE
+  MALE
+  INTERSEX
+  UNKNOWN
+}
+
+enum VerificationStatus {
+  DRAFT
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum ProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  NEEDS_REVIEW
+}
+
+enum QuoteRequestStatus {
+  DRAFT
+  SUBMITTED
+  NEEDS_MORE_DOCUMENTS
+  CONSULTATION_PROPOSED
+  ACCEPTED_FOR_QUOTE
+  REJECTED
+  QUOTED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum MedicationLogStatus {
+  TAKEN
+  MISSED
+  POSTPONED
+  SIDE_EFFECT
+}
+
+enum ConsentPurpose {
+  DOCUMENT_UPLOAD
+  AI_ANALYSIS
+  CLINIC_SHARING
+  MEDICATION_FOLLOW_UP
+  MARKETING
+}
+
+enum ConsentStatus {
+  GRANTED
+  REVOKED
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  PERSONAL
+  SENSITIVE_HEALTH_DATA
+  PAYMENT
+}
+
+model User {
+  id                String          @id @default(uuid()) @db.Uuid
+  email             String?         @unique
+  phone             String?         @unique
+  passwordHash      String?
+  roles             UserRole[]
+  mfaEnabled        Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  patientProfile    PatientProfile?
+  clinicMemberships ClinicMember[]
+  consents          Consent[]
+  auditLogs         AuditLog[]      @relation("ActorAuditLogs")
+
+  @@index([email])
+  @@index([phone])
+}
+
+model PatientProfile {
+  id                String            @id @default(uuid()) @db.Uuid
+  userId            String            @unique @db.Uuid
+  countryCode       String?
+  languageCode      String?
+  currencyCode      String?
+  dateOfBirth       DateTime?
+  biologicalSex     BiologicalSex?
+  medicalHistory    Json?
+  allergies         Json?
+  currentMedication Json?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  user              User              @relation(fields: [userId], references: [id])
+  documents         MedicalDocument[]
+  quoteRequests     QuoteRequest[]
+  medicationPlans   MedicationPlan[]
+  postOpEntries     PostOpEntry[]
+
+  @@index([countryCode])
+}
+
+model Clinic {
+  id                 String             @id @default(uuid()) @db.Uuid
+  name               String
+  countryCode        String
+  verificationStatus VerificationStatus @default(DRAFT)
+  publishedAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  members            ClinicMember[]
+  procedures         ClinicProcedure[]
+  quoteRequests      QuoteRequest[]
+  documentShares     DocumentShare[]
+
+  @@index([countryCode])
+  @@index([verificationStatus])
+}
+
+model ClinicMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  clinicId  String   @db.Uuid
+  userId    String   @db.Uuid
+  role      UserRole
+  createdAt DateTime @default(now())
+  clinic    Clinic   @relation(fields: [clinicId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([clinicId, userId, role])
+}
+
+model Procedure {
+  id            String            @id @default(uuid()) @db.Uuid
+  specialty     String
+  slug          String            @unique
+  name          String
+  description   String?
+  requiredDocs  Json?
+  medicalCodes  Json?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  clinics       ClinicProcedure[]
+  quoteRequests QuoteRequest[]
+
+  @@index([specialty])
+}
+
+model ClinicProcedure {
+  id              String    @id @default(uuid()) @db.Uuid
+  clinicId        String    @db.Uuid
+  procedureId     String    @db.Uuid
+  basePriceCents  Int?
+  currencyCode    String?
+  includedItems   Json?
+  excludedItems   Json?
+  availability    Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  clinic          Clinic    @relation(fields: [clinicId], references: [id])
+  procedure       Procedure @relation(fields: [procedureId], references: [id])
+
+  @@unique([clinicId, procedureId])
+}
+
+model MedicalDocument {
+  id             String             @id @default(uuid()) @db.Uuid
+  patientId      String             @db.Uuid
+  storageKey     String             @unique
+  fileName       String
+  mimeType       String
+  sizeBytes      Int
+  classification DataClassification @default(SENSITIVE_HEALTH_DATA)
+  ocrStatus      ProcessingStatus   @default(PENDING)
+  createdAt      DateTime           @default(now())
+  patient        PatientProfile     @relation(fields: [patientId], references: [id])
+  shares         DocumentShare[]
+  summaries      MedicalSummary[]
+
+  @@index([patientId])
+  @@index([ocrStatus])
+}
+
+model DocumentShare {
+  id             String           @id @default(uuid()) @db.Uuid
+  documentId     String           @db.Uuid
+  clinicId       String           @db.Uuid
+  quoteRequestId String?          @db.Uuid
+  consentId      String?          @db.Uuid
+  purpose        ConsentPurpose
+  grantedAt      DateTime         @default(now())
+  revokedAt      DateTime?
+  document       MedicalDocument  @relation(fields: [documentId], references: [id])
+  clinic         Clinic           @relation(fields: [clinicId], references: [id])
+  quoteRequest   QuoteRequest?    @relation(fields: [quoteRequestId], references: [id])
+  consent        Consent?         @relation(fields: [consentId], references: [id])
+
+  @@index([documentId])
+  @@index([clinicId])
+  @@index([quoteRequestId])
+}
+
+model MedicalSummary {
+  id              String           @id @default(uuid()) @db.Uuid
+  patientId       String           @db.Uuid
+  documentId      String?          @db.Uuid
+  status          ProcessingStatus @default(PENDING)
+  languageCode    String
+  content         Json?
+  sourceCitations Json?
+  validationNotes Json?
+  createdAt       DateTime         @default(now())
+  document        MedicalDocument? @relation(fields: [documentId], references: [id])
+
+  @@index([patientId])
+  @@index([status])
+}
+
+model QuoteRequest {
+  id             String               @id @default(uuid()) @db.Uuid
+  patientId      String               @db.Uuid
+  clinicId       String               @db.Uuid
+  procedureId    String               @db.Uuid
+  status         QuoteRequestStatus   @default(DRAFT)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  patient        PatientProfile       @relation(fields: [patientId], references: [id])
+  clinic         Clinic               @relation(fields: [clinicId], references: [id])
+  procedure      Procedure            @relation(fields: [procedureId], references: [id])
+  quotes         Quote[]
+  documentShares DocumentShare[]
+  conversations  Conversation[]
+
+  @@index([patientId])
+  @@index([clinicId])
+  @@index([status])
+}
+
+model Quote {
+  id              String       @id @default(uuid()) @db.Uuid
+  requestId       String       @db.Uuid
+  status          QuoteStatus  @default(DRAFT)
+  totalPriceCents Int?
+  currencyCode    String?
+  includedItems   Json?
+  excludedItems   Json?
+  validityEndsAt  DateTime?
+  createdAt       DateTime     @default(now())
+  request         QuoteRequest @relation(fields: [requestId], references: [id])
+  booking         Booking?
+
+  @@index([requestId])
+  @@index([status])
+}
+
+model Booking {
+  id            String         @id @default(uuid()) @db.Uuid
+  quoteId       String         @unique @db.Uuid
+  paymentStatus PaymentStatus  @default(PENDING)
+  scheduledAt   DateTime?
+  createdAt     DateTime       @default(now())
+  quote         Quote          @relation(fields: [quoteId], references: [id])
+  depositPayment Payment?
+  conversations Conversation[]
+  postOpEntries PostOpEntry[]
+}
+
+model Conversation {
+  id             String        @id @default(uuid()) @db.Uuid
+  quoteRequestId String?       @db.Uuid
+  bookingId      String?       @db.Uuid
+  createdAt      DateTime      @default(now())
+  quoteRequest   QuoteRequest? @relation(fields: [quoteRequestId], references: [id])
+  booking        Booking?      @relation(fields: [bookingId], references: [id])
+  messages       Message[]
+
+  @@index([quoteRequestId])
+  @@index([bookingId])
+}
+
+model Message {
+  id              String       @id @default(uuid()) @db.Uuid
+  conversationId  String       @db.Uuid
+  senderUserId    String       @db.Uuid
+  bodyMasked      String
+  maskingMetadata Json?
+  createdAt       DateTime     @default(now())
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderUserId])
+}
+
+model Payment {
+  id                    String        @id @default(uuid()) @db.Uuid
+  bookingId             String?       @unique @db.Uuid
+  provider              String
+  providerPaymentId     String?       @unique
+  amountCents           Int
+  currencyCode          String
+  status                PaymentStatus @default(PENDING)
+  commissionAmountCents Int?
+  createdAt             DateTime      @default(now())
+  booking               Booking?      @relation(fields: [bookingId], references: [id])
+
+  @@index([status])
+}
+
+model MedicationPlan {
+  id           String          @id @default(uuid()) @db.Uuid
+  patientId    String          @db.Uuid
+  name         String
+  dose         String?
+  frequency    String?
+  duration     String?
+  instructions String?
+  createdAt    DateTime        @default(now())
+  patient      PatientProfile  @relation(fields: [patientId], references: [id])
+  logs         MedicationLog[]
+
+  @@index([patientId])
+}
+
+model MedicationLog {
+  id        String              @id @default(uuid()) @db.Uuid
+  planId    String              @db.Uuid
+  status    MedicationLogStatus
+  note      String?
+  loggedAt  DateTime            @default(now())
+  plan      MedicationPlan      @relation(fields: [planId], references: [id])
+
+  @@index([planId])
+  @@index([status])
+}
+
+model PostOpEntry {
+  id        String         @id @default(uuid()) @db.Uuid
+  patientId String         @db.Uuid
+  bookingId String?        @db.Uuid
+  data      Json
+  severity  String?
+  createdAt DateTime       @default(now())
+  patient   PatientProfile @relation(fields: [patientId], references: [id])
+  booking   Booking?       @relation(fields: [bookingId], references: [id])
+
+  @@index([patientId])
+  @@index([bookingId])
+}
+
+model Consent {
+  id             String          @id @default(uuid()) @db.Uuid
+  userId         String          @db.Uuid
+  purpose        ConsentPurpose
+  status         ConsentStatus   @default(GRANTED)
+  grantedAt      DateTime        @default(now())
+  revokedAt      DateTime?
+  metadata       Json?
+  user           User            @relation(fields: [userId], references: [id])
+  documentShares DocumentShare[]
+
+  @@index([userId])
+  @@index([purpose, status])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @db.Uuid
+  action      String
+  resourceType String
+  resourceId  String?
+  purpose     String?
+  reason      String?
+  ipHash      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  actor       User?    @relation("ActorAuditLogs", fields: [actorUserId], references: [id])
+
+  @@index([actorUserId])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+}

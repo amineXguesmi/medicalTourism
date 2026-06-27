@@ -1,0 +1,10 @@
+{
+  "name": "@medtour/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Next.js web scaffold is planned after backend foundations.\"",
+    "lint": "echo \"No web lint target yet.\"",
+    "test": "echo \"No web tests yet.\""
+  }
+}

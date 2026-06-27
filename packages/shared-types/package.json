@@ -1,0 +1,9 @@
+{
+  "name": "@medtour/shared-types",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "echo \"No shared types lint target yet.\"",
+    "test": "echo \"No shared types tests yet.\""
+  }
+}

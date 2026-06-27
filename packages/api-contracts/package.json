@@ -1,0 +1,9 @@
+{
+  "name": "@medtour/api-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "echo \"No generated contracts yet.\"",
+    "test": "echo \"No contract tests yet.\""
+  }
+}
