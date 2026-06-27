@@ -9,6 +9,8 @@ import { ProceduresModule } from './modules/procedures/procedures.module';
 import { QuoteRequestsModule } from './modules/quote-requests/quote-requests.module';
 import { SearchModule } from './modules/search/search.module';
 import { UsersModule } from './modules/users/users.module';
+import { AiSummaryModule } from './modules/ai-summary/ai-summary.module';
+import { ClinicPortalModule } from './modules/clinic-portal/clinic-portal.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { UsersModule } from './modules/users/users.module';
     SearchModule,
     QuoteRequestsModule,
     AuthModule,
+    AiSummaryModule,
+    ClinicPortalModule,
   ],
 })
 export class AppModule {}
