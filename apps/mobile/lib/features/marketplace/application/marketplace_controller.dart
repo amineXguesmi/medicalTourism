@@ -42,6 +42,7 @@ class MarketplaceController extends ChangeNotifier {
   String query = '';
   String? selectedProcedureSlug;
   String? selectedCountryCode;
+  String patientCountryCode = 'FR';
   String sort = 'total_asc';
 
   List<ClinicOffer> get selectedOffers {
@@ -110,6 +111,18 @@ class MarketplaceController extends ChangeNotifier {
 
   Future<void> selectSort(String value) async {
     sort = value;
+    await _reloadOffers();
+  }
+
+  Future<void> updatePatientCountryCode(String? countryCode) async {
+    final normalized = countryCode?.trim().toUpperCase();
+    if (normalized == null ||
+        normalized.isEmpty ||
+        normalized == patientCountryCode) {
+      return;
+    }
+
+    patientCountryCode = normalized;
     await _reloadOffers();
   }
 
@@ -222,7 +235,7 @@ class MarketplaceController extends ChangeNotifier {
     final response = await _apiClient.searchOffers(
       procedureSlug: selectedProcedureSlug,
       countryCode: selectedCountryCode,
-      patientCountryCode: 'FR',
+      patientCountryCode: patientCountryCode,
       q: query,
       sort: sort,
       limit: 20,

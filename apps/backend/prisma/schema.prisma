@@ -115,11 +115,18 @@ model User {
 model PatientProfile {
   id                String            @id @default(uuid()) @db.Uuid
   userId            String            @unique @db.Uuid
+  fullName          String?
   countryCode       String?
+  residenceCity     String?
   languageCode      String?
   currencyCode      String?
   dateOfBirth       DateTime?
   biologicalSex     BiologicalSex?
+  genderIdentity    String?
+  latitude          Float?
+  longitude         Float?
+  travelRadiusKm    Int?
+  travelPreferences Json?
   medicalHistory    Json?
   allergies         Json?
   currentMedication Json?
@@ -132,6 +139,7 @@ model PatientProfile {
   postOpEntries     PostOpEntry[]
 
   @@index([countryCode])
+  @@index([countryCode, residenceCity])
 }
 
 model Clinic {

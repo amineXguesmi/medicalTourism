@@ -1,17 +1,78 @@
 typedef JsonMap = Map<String, dynamic>;
 
 class AuthUser {
-  const AuthUser({required this.id, required this.email, required this.roles});
+  const AuthUser({
+    required this.id,
+    required this.email,
+    required this.roles,
+    this.phone,
+    this.patientProfile,
+  });
 
   final String id;
   final String email;
   final List<String> roles;
+  final String? phone;
+  final PatientProfileSnapshot? patientProfile;
 
   factory AuthUser.fromJson(JsonMap json) {
     return AuthUser(
       id: _readString(json['id']),
       email: _readString(json['email']),
       roles: _readStringList(json['roles']),
+      phone: _readNullableString(json['phone']),
+      patientProfile: json['patientProfile'] is JsonMap
+          ? PatientProfileSnapshot.fromJson(_readMap(json['patientProfile']))
+          : null,
+    );
+  }
+}
+
+class PatientProfileSnapshot {
+  const PatientProfileSnapshot({
+    this.fullName,
+    this.countryCode,
+    this.residenceCity,
+    this.languageCode,
+    this.currencyCode,
+    this.dateOfBirth,
+    this.biologicalSex,
+    this.genderIdentity,
+    this.latitude,
+    this.longitude,
+    this.travelRadiusKm,
+    this.medicalSummary,
+  });
+
+  final String? fullName;
+  final String? countryCode;
+  final String? residenceCity;
+  final String? languageCode;
+  final String? currencyCode;
+  final DateTime? dateOfBirth;
+  final String? biologicalSex;
+  final String? genderIdentity;
+  final double? latitude;
+  final double? longitude;
+  final int? travelRadiusKm;
+  final String? medicalSummary;
+
+  factory PatientProfileSnapshot.fromJson(JsonMap json) {
+    return PatientProfileSnapshot(
+      fullName: _readNullableString(json['fullName']),
+      countryCode: _readNullableString(json['countryCode']),
+      residenceCity: _readNullableString(json['residenceCity']),
+      languageCode: _readNullableString(json['languageCode']),
+      currencyCode: _readNullableString(json['currencyCode']),
+      dateOfBirth: DateTime.tryParse(_readString(json['dateOfBirth'])),
+      biologicalSex: _readNullableString(json['biologicalSex']),
+      genderIdentity: _readNullableString(json['genderIdentity']),
+      latitude: _readNullableDouble(json['latitude']),
+      longitude: _readNullableDouble(json['longitude']),
+      travelRadiusKm: _readNullableInt(json['travelRadiusKm']),
+      medicalSummary: _readNullableString(
+        _readMap(json['medicalHistory'])['summary'],
+      ),
     );
   }
 }
@@ -265,6 +326,11 @@ String _readString(Object? value, {String fallback = ''}) {
   return text == null || text.isEmpty ? fallback : text;
 }
 
+String? _readNullableString(Object? value) {
+  final text = value?.toString().trim();
+  return text == null || text.isEmpty ? null : text;
+}
+
 int _readInt(Object? value) {
   return _readNullableInt(value) ?? 0;
 }
@@ -280,6 +346,16 @@ int? _readNullableInt(Object? value) {
     return value.round();
   }
   return int.tryParse(value.toString());
+}
+
+double? _readNullableDouble(Object? value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is num) {
+    return value.toDouble();
+  }
+  return double.tryParse(value.toString());
 }
 
 List<String> _readStringList(Object? value) {

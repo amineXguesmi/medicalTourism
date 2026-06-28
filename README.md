@@ -89,7 +89,7 @@ docker compose -f infra/docker/docker-compose.yml up -d postgres redis minio
 
 ```powershell
 npm run prisma:generate
-npm exec --workspace=@medtour/backend -- prisma migrate deploy
+npm run prisma:migrate:deploy --workspace=@medtour/backend
 npm run prisma:seed --workspace=@medtour/backend
 ```
 

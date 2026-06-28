@@ -5,21 +5,27 @@ import 'package:medtour_mobile/features/marketplace/application/marketplace_cont
 void main() {
   testWidgets('renders the marketplace MVP shell', (tester) async {
     await tester.pumpWidget(
-      MedTourApp(marketplaceController: MarketplaceController.sample()),
+      MedTourApp(
+        marketplaceController: MarketplaceController.sample(),
+        initialStage: AppStartStage.app,
+      ),
     );
 
     expect(find.text('MedTour AI'), findsOneWidget);
-    expect(find.text('Compare verified care'), findsOneWidget);
+    expect(find.text('Compare care with the full trip in view'), findsOneWidget);
     expect(find.text('Barcelona Dental Institute'), findsOneWidget);
-    expect(find.text('Medical file readiness'), findsOneWidget);
+    expect(find.text('Quote readiness'), findsOneWidget);
   });
 
   testWidgets('opens patient auth sheet from the marketplace', (tester) async {
     await tester.pumpWidget(
-      MedTourApp(marketplaceController: MarketplaceController.sample()),
+      MedTourApp(
+        marketplaceController: MarketplaceController.sample(),
+        initialStage: AppStartStage.app,
+      ),
     );
 
-    await tester.tap(find.text('Login'));
+    await tester.tap(find.text('Patient'));
     await tester.pumpAndSettle();
 
     expect(find.text('Patient access'), findsOneWidget);

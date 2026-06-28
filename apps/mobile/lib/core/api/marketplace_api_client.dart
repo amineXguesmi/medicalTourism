@@ -23,20 +23,103 @@ class MarketplaceApiClient {
   }
 
   Future<AuthResponse> registerPatient({
+    required String fullName,
     required String email,
     required String password,
-    String? phone,
+    required String phone,
+    required String countryCode,
+    required String residenceCity,
+    String? languageCode,
+    String? currencyCode,
+    String? biologicalSex,
+    String? genderIdentity,
+    String? dateOfBirth,
+    double? latitude,
+    double? longitude,
+    int? travelRadiusKm,
+    String? preferredDestinationCountryCode,
+    String? medicalSummary,
   }) async {
     final body = await _post(
       'auth/register/patient',
       body: {
+        'fullName': fullName.trim(),
         'email': email.trim(),
         'password': password,
-        if (phone != null && phone.trim().isNotEmpty) 'phone': phone.trim(),
+        'phone': phone.trim(),
+        'countryCode': countryCode.trim().toUpperCase(),
+        'residenceCity': residenceCity.trim(),
+        ..._profileFields(
+          languageCode: languageCode,
+          currencyCode: currencyCode,
+          biologicalSex: biologicalSex,
+          genderIdentity: genderIdentity,
+          dateOfBirth: dateOfBirth,
+          latitude: latitude,
+          longitude: longitude,
+          travelRadiusKm: travelRadiusKm,
+          preferredDestinationCountryCode: preferredDestinationCountryCode,
+          medicalSummary: medicalSummary,
+        ),
       },
     );
 
     return AuthResponse.fromJson(body is JsonMap ? body : {});
+  }
+
+  Future<AuthUser> getMe({required String accessToken}) async {
+    final body = await _get(
+      'users/me',
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    return AuthUser.fromJson(body is JsonMap ? body : {});
+  }
+
+  Future<AuthUser> updateMe({
+    required String accessToken,
+    String? fullName,
+    String? phone,
+    String? countryCode,
+    String? residenceCity,
+    String? languageCode,
+    String? currencyCode,
+    String? biologicalSex,
+    String? genderIdentity,
+    String? dateOfBirth,
+    double? latitude,
+    double? longitude,
+    int? travelRadiusKm,
+    String? preferredDestinationCountryCode,
+    String? medicalSummary,
+  }) async {
+    final body = await _patch(
+      'users/me',
+      body: {
+        if (fullName != null && fullName.trim().isNotEmpty)
+          'fullName': fullName.trim(),
+        if (phone != null && phone.trim().isNotEmpty) 'phone': phone.trim(),
+        if (countryCode != null && countryCode.trim().isNotEmpty)
+          'countryCode': countryCode.trim().toUpperCase(),
+        if (residenceCity != null && residenceCity.trim().isNotEmpty)
+          'residenceCity': residenceCity.trim(),
+        ..._profileFields(
+          languageCode: languageCode,
+          currencyCode: currencyCode,
+          biologicalSex: biologicalSex,
+          genderIdentity: genderIdentity,
+          dateOfBirth: dateOfBirth,
+          latitude: latitude,
+          longitude: longitude,
+          travelRadiusKm: travelRadiusKm,
+          preferredDestinationCountryCode: preferredDestinationCountryCode,
+          medicalSummary: medicalSummary,
+        ),
+      },
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    return AuthUser.fromJson(body is JsonMap ? body : {});
   }
 
   Future<List<MarketplaceProcedure>> listProcedures({String? q}) async {
@@ -98,9 +181,10 @@ class MarketplaceApiClient {
   Future<Object?> _get(
     String path, {
     Map<String, String?> query = const {},
+    Map<String, String> headers = const {},
   }) async {
     final uri = _buildUri(path, query);
-    final json = await transport.get(uri);
+    final json = await transport.get(uri, headers: headers);
     return jsonDecode(json);
   }
 
@@ -112,6 +196,27 @@ class MarketplaceApiClient {
     final uri = _buildUri(path, const {});
     final json = await transport.post(uri, body: body, headers: headers);
     return jsonDecode(json);
+  }
+
+  Future<Object?> _patch(
+    String path, {
+    required Object body,
+    Map<String, String> headers = const {},
+  }) async {
+    final uri = _buildUri(path, const {});
+    final json = await transport.patch(uri, body: body, headers: headers);
+    return jsonDecode(json);
+  }
+
+  Future<QuoteRequestsResponse> listMyQuoteRequests({
+    required String accessToken,
+  }) async {
+    final body = await _get(
+      'quote-requests/mine',
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
+
+    return QuoteRequestsResponse.fromJson(body is JsonMap ? body : {});
   }
 
   Uri _buildUri(String path, Map<String, String?> query) {
@@ -132,5 +237,41 @@ class MarketplaceApiClient {
       path: fullPath.startsWith('/') ? fullPath : '/$fullPath',
       queryParameters: cleanQuery.isEmpty ? null : cleanQuery,
     );
+  }
+
+  Map<String, Object> _profileFields({
+    String? languageCode,
+    String? currencyCode,
+    String? biologicalSex,
+    String? genderIdentity,
+    String? dateOfBirth,
+    double? latitude,
+    double? longitude,
+    int? travelRadiusKm,
+    String? preferredDestinationCountryCode,
+    String? medicalSummary,
+  }) {
+    return {
+      if (languageCode != null && languageCode.trim().isNotEmpty)
+        'languageCode': languageCode.trim(),
+      if (currencyCode != null && currencyCode.trim().isNotEmpty)
+        'currencyCode': currencyCode.trim().toUpperCase(),
+      if (biologicalSex != null && biologicalSex.trim().isNotEmpty)
+        'biologicalSex': biologicalSex.trim(),
+      if (genderIdentity != null && genderIdentity.trim().isNotEmpty)
+        'genderIdentity': genderIdentity.trim(),
+      if (dateOfBirth != null && dateOfBirth.trim().isNotEmpty)
+        'dateOfBirth': dateOfBirth.trim(),
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (travelRadiusKm != null) 'travelRadiusKm': travelRadiusKm,
+      if (preferredDestinationCountryCode != null &&
+          preferredDestinationCountryCode.trim().isNotEmpty)
+        'preferredDestinationCountryCode': preferredDestinationCountryCode
+            .trim()
+            .toUpperCase(),
+      if (medicalSummary != null && medicalSummary.trim().isNotEmpty)
+        'medicalSummary': medicalSummary.trim(),
+    };
   }
 }

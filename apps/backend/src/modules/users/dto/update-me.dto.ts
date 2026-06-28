@@ -1,8 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { BiologicalSex } from '@prisma/client';
 import {
-  IsEmail,
   IsEnum,
   IsISO8601,
   IsInt,
@@ -16,35 +15,30 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class RegisterPatientDto {
-  @ApiProperty({ example: 'Amina Patient' })
+export class UpdateMeDto {
+  @ApiPropertyOptional({ example: 'Amina Patient' })
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  fullName: string;
+  fullName?: string;
 
-  @ApiProperty({ example: 'patient@example.com' })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ example: '+33123456789' })
+  @ApiPropertyOptional({ example: '+33123456789' })
+  @IsOptional()
   @IsString()
   @MinLength(6)
-  phone: string;
+  phone?: string;
 
-  @ApiProperty({ minLength: 12 })
-  @IsString()
-  @MinLength(12)
-  password: string;
-
-  @ApiProperty({ example: 'FR' })
+  @ApiPropertyOptional({ example: 'FR' })
+  @IsOptional()
   @IsString()
   @Length(2, 2)
-  countryCode: string;
+  countryCode?: string;
 
-  @ApiProperty({ example: 'Paris' })
+  @ApiPropertyOptional({ example: 'Paris' })
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  residenceCity: string;
+  residenceCity?: string;
 
   @ApiPropertyOptional({ example: 'en' })
   @IsOptional()

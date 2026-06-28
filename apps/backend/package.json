@@ -8,10 +8,12 @@
     "start:dev": "nest start --watch",
     "lint": "tsc --noEmit -p tsconfig.json",
     "test": "jest --passWithNoTests --runInBand",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma": "node scripts/prisma-with-env.js",
+    "prisma:generate": "node scripts/prisma-with-env.js generate",
+    "prisma:migrate": "node scripts/prisma-with-env.js migrate dev",
+    "prisma:migrate:deploy": "node scripts/prisma-with-env.js migrate deploy",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "node scripts/prisma-with-env.js studio"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",

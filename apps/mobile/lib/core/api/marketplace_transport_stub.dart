@@ -3,11 +3,19 @@ class MarketplaceTransport {
 
   final Duration timeout;
 
-  Future<String> get(Uri uri) {
+  Future<String> get(Uri uri, {Map<String, String> headers = const {}}) {
     throw UnsupportedError('HTTP transport is not available on this platform.');
   }
 
   Future<String> post(
+    Uri uri, {
+    required Object body,
+    Map<String, String> headers = const {},
+  }) {
+    throw UnsupportedError('HTTP transport is not available on this platform.');
+  }
+
+  Future<String> patch(
     Uri uri, {
     required Object body,
     Map<String, String> headers = const {},

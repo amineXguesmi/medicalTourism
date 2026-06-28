@@ -26,6 +26,8 @@ abstract final class MedTourTheme {
     );
 
     return base.copyWith(
+      splashColor: MedTourColors.action300.withAlpha(30),
+      highlightColor: MedTourColors.brand100.withAlpha(45),
       appBarTheme: const AppBarTheme(
         backgroundColor: MedTourColors.neutral50,
         foregroundColor: MedTourColors.neutral900,
@@ -57,18 +59,43 @@ abstract final class MedTourTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: MedTourColors.brand600,
           foregroundColor: MedTourColors.neutral0,
-          minimumSize: const Size(44, 48),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          minimumSize: const Size(48, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: MedTourColors.brand700,
-          minimumSize: const Size(44, 46),
+          minimumSize: const Size(48, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           side: const BorderSide(color: MedTourColors.brand200),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           textStyle: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: MedTourColors.brand700,
+          foregroundColor: MedTourColors.neutral0,
+          minimumSize: const Size(48, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          side: const WidgetStatePropertyAll(
+            BorderSide(color: MedTourColors.neutral200),
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -94,6 +121,26 @@ abstract final class MedTourTheme {
           ),
         ),
         hintStyle: const TextStyle(color: MedTourColors.neutral500),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: MedTourColors.neutral200,
+        thickness: 1,
+        space: 1,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: MedTourColors.neutral0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: MedTourColors.neutral900,
+        contentTextStyle: const TextStyle(
+          color: MedTourColors.neutral0,
+          fontWeight: FontWeight.w700,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       textTheme: base.textTheme.copyWith(
         headlineSmall: base.textTheme.headlineSmall?.copyWith(

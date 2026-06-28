@@ -23,6 +23,21 @@ export class AuthService {
       phone: dto.phone,
       passwordHash,
       roles: [UserRole.PATIENT],
+      patientProfile: {
+        fullName: dto.fullName,
+        countryCode: dto.countryCode,
+        residenceCity: dto.residenceCity,
+        languageCode: dto.languageCode,
+        currencyCode: dto.currencyCode,
+        dateOfBirth: dto.dateOfBirth,
+        biologicalSex: dto.biologicalSex,
+        genderIdentity: dto.genderIdentity,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        travelRadiusKm: dto.travelRadiusKm,
+        preferredDestinationCountryCode: dto.preferredDestinationCountryCode,
+        medicalSummary: dto.medicalSummary,
+      },
     });
 
     await this.audit.record({
@@ -60,7 +75,12 @@ export class AuthService {
     return this.issueAuthResponse(sanitizeUser(user));
   }
 
-  private issueAuthResponse(user: { id: string; email?: string | null; roles: string[] }) {
+  private issueAuthResponse(user: {
+    id: string;
+    email?: string | null;
+    roles: string[];
+    [key: string]: unknown;
+  }) {
     return {
       user,
       accessToken: this.jwtService.sign({

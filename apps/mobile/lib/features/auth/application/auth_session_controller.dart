@@ -17,6 +17,7 @@ class AuthSessionController extends ChangeNotifier {
   String? errorMessage;
 
   bool get isAuthenticated => accessToken != null && user != null;
+  String? get patientCountryCode => user?.patientProfile?.countryCode;
 
   Future<bool> login({required String email, required String password}) async {
     return _authenticate(
@@ -25,17 +26,96 @@ class AuthSessionController extends ChangeNotifier {
   }
 
   Future<bool> registerPatient({
+    required String fullName,
     required String email,
     required String password,
-    String? phone,
+    required String phone,
+    required String countryCode,
+    required String residenceCity,
+    String? languageCode,
+    String? currencyCode,
+    String? biologicalSex,
+    String? genderIdentity,
+    String? dateOfBirth,
+    double? latitude,
+    double? longitude,
+    int? travelRadiusKm,
+    String? preferredDestinationCountryCode,
+    String? medicalSummary,
   }) async {
     return _authenticate(
       () => _apiClient.registerPatient(
+        fullName: fullName,
         email: email,
         password: password,
         phone: phone,
+        countryCode: countryCode,
+        residenceCity: residenceCity,
+        languageCode: languageCode,
+        currencyCode: currencyCode,
+        biologicalSex: biologicalSex,
+        genderIdentity: genderIdentity,
+        dateOfBirth: dateOfBirth,
+        latitude: latitude,
+        longitude: longitude,
+        travelRadiusKm: travelRadiusKm,
+        preferredDestinationCountryCode: preferredDestinationCountryCode,
+        medicalSummary: medicalSummary,
       ),
     );
+  }
+
+  Future<bool> updateProfile({
+    String? fullName,
+    String? phone,
+    String? countryCode,
+    String? residenceCity,
+    String? languageCode,
+    String? currencyCode,
+    String? biologicalSex,
+    String? genderIdentity,
+    String? dateOfBirth,
+    double? latitude,
+    double? longitude,
+    int? travelRadiusKm,
+    String? preferredDestinationCountryCode,
+    String? medicalSummary,
+  }) async {
+    final token = accessToken;
+    if (token == null || token.isEmpty || isLoading) {
+      return false;
+    }
+
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      user = await _apiClient.updateMe(
+        accessToken: token,
+        fullName: fullName,
+        phone: phone,
+        countryCode: countryCode,
+        residenceCity: residenceCity,
+        languageCode: languageCode,
+        currencyCode: currencyCode,
+        biologicalSex: biologicalSex,
+        genderIdentity: genderIdentity,
+        dateOfBirth: dateOfBirth,
+        latitude: latitude,
+        longitude: longitude,
+        travelRadiusKm: travelRadiusKm,
+        preferredDestinationCountryCode: preferredDestinationCountryCode,
+        medicalSummary: medicalSummary,
+      );
+      return true;
+    } catch (_) {
+      errorMessage = 'Could not save the profile. Please try again.';
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<bool> loginWithDemoPatient() {
